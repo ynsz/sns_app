@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sns_app/modules/auth/current_user_store.dart';
 import 'package:sns_app/screens/home_screen.dart';
 import 'package:sns_app/screens/signin_screen.dart';
 import 'package:sns_app/screens/signup_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -11,17 +13,23 @@ void main() async {
     url: dotenv.env["SUPABASE_URL"]!,
     anonKey: dotenv.env["SUPABASE_API_KEY"]!,
   );
-  runApp(const SnsApp());
+  runApp(const ProviderScope(child: SnsApp()));
 }
 
-class SnsApp extends StatefulWidget {
+class SnsApp extends ConsumerStatefulWidget {
   const SnsApp({super.key});
 
   @override
   SnsAppState createState() => SnsAppState();
 }
 
-class SnsAppState extends State<SnsApp> {
+class SnsAppState extends ConsumerState<SnsApp> {
+  Widget _buildbody() {
+    final currentUser = ref.watch(currentUserProvider);
+    if (currentUser == null) return const SigninScreen();
+    return const HomeScreen();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,7 +57,7 @@ class SnsAppState extends State<SnsApp> {
             return MaterialPageRoute(builder: (context) => const HomeScreen());
         }
       },
-      home: const SigninScreen(),
+      home: _buildbody(),
     );
   }
 }
