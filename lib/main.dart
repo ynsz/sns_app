@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sns_app/modules/auth/auth.repository.dart';
 import 'package:sns_app/modules/auth/current_user_store.dart';
 import 'package:sns_app/screens/home_screen.dart';
 import 'package:sns_app/screens/signin_screen.dart';
@@ -24,10 +25,33 @@ class SnsApp extends ConsumerStatefulWidget {
 }
 
 class SnsAppState extends ConsumerState<SnsApp> {
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _trySignin();
+  }
+
   Widget _buildbody() {
+    if (!_initialized) return Container();
     final currentUser = ref.watch(currentUserProvider);
     if (currentUser == null) return const SigninScreen();
     return const HomeScreen();
+  }
+
+  void _trySignin() async {
+    try {
+      final currentUser = await AuthRepository().getCurrentUser();
+      if (currentUser == null) return;
+      ref.read(currentUserProvider.notifier).setCurrentUser(currentUser);
+    } on AuthException catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _initialized = true;
+      });
+    }
   }
 
   @override
