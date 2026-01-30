@@ -3,7 +3,8 @@ import 'package:sns_app/modules/posts/post.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
-  const PostCard({super.key, required this.post});
+  final void Function()? onDeleteButtonTapped;
+  const PostCard({super.key, required this.post, this.onDeleteButtonTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,15 @@ class PostCard extends StatelessWidget {
               post.userName,
               style: const TextStyle(color: Color(0xFF34D399)),
             ),
+            trailing: onDeleteButtonTapped != null
+                ? TextButton(
+                    onPressed: onDeleteButtonTapped,
+                    child: const Text(
+                      "削除",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  )
+                : null,
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

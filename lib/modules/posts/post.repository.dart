@@ -35,4 +35,9 @@ class PostRepository {
         )
         .toList();
   }
+
+  Future<bool> delete(int id) async {
+    await Supabase.instance.client.from("posts").delete().eq("id", id);
+    return true;
+  }
 }
