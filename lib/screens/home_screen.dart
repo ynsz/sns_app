@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sns_app/modules/auth/current_user_store.dart';
+import 'package:sns_app/modules/posts/post.dart';
 import 'package:sns_app/modules/posts/post.repository.dart';
 import 'package:sns_app/widgets/header.dart';
 import 'package:sns_app/widgets/post_card.dart';
@@ -14,16 +15,31 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class HomeScreenState extends ConsumerState<HomeScreen> {
   String _content = "";
+  List<Post> _posts = [];
+
   final _textController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPosts();
+  }
 
   void _createPost() async {
     if (_content == "") return;
     final currentUser = ref.read(currentUserProvider);
     final post = await PostRepository().create(_content, currentUser!);
-    print(post);
     _textController.text = "";
     setState(() {
+      _posts = [post, ..._posts];
       _content = "";
+    });
+  }
+
+  void _fetchPosts() async {
+    final postList = await PostRepository().find();
+    setState(() {
+      _posts = postList;
     });
   }
 
@@ -46,10 +62,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
               }),
               onSubmited: _createPost,
             ),
-            PostCard(),
-            PostCard(),
-            PostCard(),
-            PostCard(),
+            ..._posts.map((post) => PostCard(post: post)),
           ],
         ),
       ),
