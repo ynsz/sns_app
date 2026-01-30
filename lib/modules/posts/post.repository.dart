@@ -16,10 +16,13 @@ class PostRepository {
     });
   }
 
-  Future<List<Post>> find() async {
+  Future<List<Post>> find(int page, int limit) async {
+    final start = limit * (page - 1);
+    final end = start + limit - 1;
     final posts = await Supabase.instance.client
         .from("posts_view")
         .select("*")
+        .range(start, end)
         .order("created_at", ascending: false);
     return posts
         .map(
